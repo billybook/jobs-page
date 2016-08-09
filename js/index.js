@@ -31,21 +31,63 @@ var model= {
 
 // View
 var jobsListTemplate;
+var monthNames = [
+  "January", "February", "March",
+  "April", "May", "June", "July",
+  "August", "September", "October",
+  "November", "December"
+];
+
+Handlebars.registerHelper('formatDate', function(date) {
+  var date = new Date(date);
+  date = monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+
+  return date;
+});
 
 function compileTemplates() {
-    jobsListTemplate = $('#job-list-template').html();
+    jobsListTemplate = $('#jobs-list-template').html();
     jobsListTemplate = Handlebars.compile(jobsListTemplate);
 }
 
 function renderJobsList () {
     var jobsListHTML = jobsListTemplate(model);
-    $('#postingsList').html(jobsListHTML);
+    $('#jobsList').html(jobsListHTML);
 }
+
+function renderNewJob () {
+    var tempmodel = {
+        jobs: [model.jobs[model.jobs.lengthd-1]]
+    };
+    var jobsListHTML = jobsListTemplate(tempmodel);
+    $('#jobsList').prepend(jobsListHTML);
+}
+
+
 
 // Controller
 
 function setup() {
     compileTemplates();
+    renderJobsList();
+
+    $('#jobForm').on('click', '#addJob', addJob);
+}
+
+function addJob () {
+    model.jobs.push({
+        guid:3,
+        title: $('input[name="title"]').val(),
+        organization: $('input[name="organization"]').val(),
+        location: $('input[name="location"]').val(),
+        description: $('textarea[name="description"]').val(),
+        pubDate: $('input[name="datePosted"]').val(),
+        expirationDate: $('input[name="dateExpires"]').val(),
+        filledDate:'',
+        source:'/',
+        sourceText:'More Info'
+    })
+
     renderJobsList();
 }
 
