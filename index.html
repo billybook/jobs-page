@@ -7,17 +7,30 @@
 	</head>
 
 	<body>
+		<div id="loginForm">
+			<script id="login-template" type="text/x-handlebars-template">
+				{{#if loggedIn}}
+					<input id="signOut" type="submit" value="Sign Out" />
+				{{else}}
+					<h3>Register/Login</h3>
+					<input name="email" type="email" placeholder="Email Address" />
+					<input name="password" type="password" placeholder="Password" />
+					<input id="register" type="submit" value="Register" />
+					<input id="login" type="submit" value="Login" />
+				{{/if}}
+			</script>
+		</div>
 		<h1>C2ER Member Jobs Page</h1>
-		<div id="postingsList">
-			<script id="job-list-template" type="text/x-handlebars-template">
+		<div id="jobsList">
+			<script id="jobs-list-template" type="text/x-handlebars-template">
 				{{#each jobs}}
 					<div class="posting" postingID="{{guid}}">
 						<a>{{title}}</a><br />
 						{{organization}}<br />
 						{{location}}<br />
-						Date Posted: {{pubDate}}
+						Date Posted: {{formatDate pubDate}}
 						{{#if expirationDate}}
-						<br />Closing Date: {{expirationDate}}
+						<br />Closing Date: {{formatDate expirationDate}}
 						{{/if}}
 					</div>
 				{{/each}}
@@ -36,6 +49,17 @@
 				{{/if}}
 				<div class="job-description">{{description}}</div>
 			</script>
+		</div>
+
+		<div id="jobForm">
+			<input name="title" placeholder="Job Title" type="text" />
+			<input name="organization" placeholder="Company" type="text" />
+			<input name="location" placeholder="Location" type="text" />
+			<input name="datePosted" placeholder="Posting Date" type="date" />
+			<input name="dateExpires" placeholder="Closing Date" type="date" />
+			<textarea name="description"> </textarea>
+
+			<button id="addJob" type="submit">Add</button>
 		</div>
 
 
