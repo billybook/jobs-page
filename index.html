@@ -7,11 +7,36 @@
 	</head>
 
 	<body>
-		<div class="container">
+		<h1>C2ER Member Jobs Page</h1>
+		<div id="postingsList">
+			<script id="job-list-template" type="text/x-handlebars-template">
+				{{#each jobs}}
+					<div class="posting" postingID="{{guid}}">
+						<a>{{title}}</a><br />
+						{{organization}}<br />
+						{{location}}<br />
+						Date Posted: {{pubDate}}
+						{{#if expirationDate}}
+						<br />Closing Date: {{expirationDate}}
+						{{/if}}
+					</div>
+				{{/each}}
+			</script>
 		</div>
 
-		<script id="jobs-template" type="text/x-handlebars-template">
-		</script>
+
+		<div id="currentPosting">
+			<script id="current-job-template" type="text/x-handlebars-template">
+				{{title}}<br />
+				{{organization}}<br />
+				{{location}}<br />
+				Date Posted: {{pubDate}}
+				{{#if expirationDate}}
+				<br />Closing Date: {{expirationDate}}
+				{{/if}}
+				<div class="job-description">{{description}}</div>
+			</script>
+		</div>
 
 
 		<script src="https://code.jquery.com/jquery-3.0.0.min.js" integrity="sha256-JmvOoLtYsmqlsWxa7mDSLMwa6dZ9rrIdtrrVYRnDRH0="
