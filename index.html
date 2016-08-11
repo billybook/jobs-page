@@ -4,6 +4,16 @@
 		<meta charset="utf-8">
 		<title>Jobs</title>
 		<link rel="stylesheet" href="css/style.css" />
+		<script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+		<script type="text/javascript">
+			tinymce.init({
+				selector: '#jobDescription',
+				menubar: false,
+				toolbar: 'undo redo styleselect bold italic alignleft aligncenter alignright bullist numlist outdent indent code',
+				plugins: 'code',
+				inline: true
+			});
+		</script>
 	</head>
 
 	<body>
@@ -25,7 +35,7 @@
 		<div id="jobsList">
 			<script id="jobs-list-template" type="text/x-handlebars-template">
 				{{#each jobs}}
-					<div class="posting" postingID="{{guid}}">
+					<div class="posting" postingID="{{guid}}" data-id="{{@key}}">
 						<a>{{title}}</a><br />
 						{{organization}}<br />
 						{{location}}<br />
@@ -33,6 +43,7 @@
 						{{#if expirationDate}}
 						<br />Closing Date: {{formatDate expirationDate}}
 						{{/if}}
+						<button class="delete">x</button>
 					</div>
 				{{/each}}
 			</script>
@@ -58,7 +69,7 @@
 			<input name="location" placeholder="Location" type="text" />
 			<input name="datePosted" placeholder="Posting Date" type="date" />
 			<input name="dateExpires" placeholder="Closing Date" type="date" />
-			<textarea name="description"> </textarea>
+			<div name="jobDescription" name="description"><i style="color:#ccc;">Description</i></div>
 
 			<button id="addJob" type="submit">Add</button>
 		</div>
