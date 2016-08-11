@@ -94,6 +94,7 @@ function setup() {
 
 
     $('#jobForm').on('click', '#addJob', handleAddJob);
+	$('#jobsList').on('click', '.delete', handleDelete);
     firebase.database().ref('jobs').on('value', processJobs);
 }
 
@@ -156,7 +157,7 @@ function handleAddJob () {
         title: $('input[name="title"]').val(),
         organization: $('input[name="organization"]').val(),
         location: $('input[name="location"]').val(),
-        description: $('textarea[name="description"]').val(),
+        description: $('div[name="jobDescription"]').html(),
         pubDate: $('input[name="datePosted"]').val(),
         expirationDate: $('input[name="dateExpires"]').val(),
         filledDate:'',
@@ -165,6 +166,13 @@ function handleAddJob () {
 		});
 	//}
     //renderJobsList();
+}
+
+function handleDelete() {
+	console.log('delete');
+	var messageId = $(this).parent().attr('data-id');
+
+	firebase.database().ref('jobs').child(messageId).remove();
 }
 
 
