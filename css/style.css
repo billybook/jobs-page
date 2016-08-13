@@ -1,0 +1,27 @@
+input {
+    margin: .25em 0;
+}
+input, [name="description"] {
+    display: block;
+    padding: .25em;
+    border: thin solid #999;
+}
+[name="description"] p:first-child {
+    margin-top:0;
+}
+[name="description"] p:last-child {
+    margin-bottom:0;
+}
+#jobsData > div {
+    display: table-cell;
+}
+
+#jobsList .posting {
+    padding: 1em;
+    margin: .25em 0;
+}
+
+[name="pubDate"] input,
+[name="expirationDate"] input{
+    display:inline-block;
+}

@@ -4,6 +4,7 @@ var model= {
     jobs: [
         {
             guid:1,
+            status: '',
             title:'Job 1',
             organization:'CREC',
             location:'Arlington, VA',
@@ -16,6 +17,7 @@ var model= {
         },
         {
             guid:2,
+            status: '',
             title:'Job 2',
             organization:'C2ER',
             location:'Rosslyn, VA',
@@ -51,6 +53,9 @@ function compileTemplates() {
 
     jobsListTemplate = $('#jobs-list-template').html();
     jobsListTemplate = Handlebars.compile(jobsListTemplate);
+
+    currentJobTemplate = $('#current-job-template').html();
+    currentJobTemplate = Handlebars.compile(currentJobTemplate);
 }
 
 function renderLogin() {
@@ -65,7 +70,7 @@ function renderJobsList () {
 
 function renderNewJob () {
     var tempmodel = {
-        jobs: [model.jobs[model.jobs.lengthd-1]]
+        jobs: [model.jobs[model.jobs.length-1]]
     };
     var jobsListHTML = jobsListTemplate(tempmodel);
     $('#jobsList').prepend(jobsListHTML);
@@ -75,6 +80,28 @@ function processJobs (snapshot){
 	console.log('db update callback');
 	model.jobs = snapshot.val();
 	renderJobsList();
+}
+
+function renderCurrentJob () {
+    console.log('show job');
+    var currentKey = $(this).attr('data-id');
+    var currentJob = {};
+    if (currentKey) {
+        currentJob = model.jobs[currentKey];
+        currentJob.key = currentKey;
+    }
+    var currentJobHTML = currentJobTemplate(currentJob);
+
+    $('#currentPosting').html(currentJobHTML);
+
+    $('.datepicker').datepicker();
+    tinymce.init({
+        selector: '[name="description"]',
+        menubar: false,
+        toolbar: 'undo redo styleselect bold italic bullist numlist code', //alignleft aligncenter alignright outdent indent
+        plugins: 'code',
+        inline: true
+    });
 }
 
 
@@ -92,10 +119,14 @@ function setup() {
 	$('#loginForm').on('click', '#signOut', handleSignOut);
 	firebase.auth().onAuthStateChanged(handleAuthStateChange);
 
-
-    $('#jobForm').on('click', '#addJob', handleAddJob);
-	$('#jobsList').on('click', '.delete', handleDelete);
+    //DB Interaction
+    $('#currentPosting').on('click', '#addJob', handleAddJob);
+	$('#currentPosting').on('click', '.delete', handleDelete);
     firebase.database().ref('jobs').on('value', processJobs);
+
+
+    $('#jobsList').on('click', '.posting', renderCurrentJob);
+    $('#addNew').on('click', renderCurrentJob);
 }
 
 function handleRegistration() {
@@ -127,6 +158,7 @@ function handleAuthStateChange() {
 		model.loggedIn = true;
 		model.user = user;
 
+        //TODO:  Reload view to show users drafts/pending
 		//firebase.database().ref('jobs').on('value', processMessages);
 	} else {
 		model.loggedIn = false;
@@ -154,12 +186,13 @@ function handleAddJob () {
 	//if (message){
     firebase.database().ref('jobs').push({
         guid:3,
+        status: 'submitted',
         title: $('input[name="title"]').val(),
         organization: $('input[name="organization"]').val(),
         location: $('input[name="location"]').val(),
-        description: $('div[name="jobDescription"]').html(),
-        pubDate: $('input[name="datePosted"]').val(),
-        expirationDate: $('input[name="dateExpires"]').val(),
+        description: $('div[name="description"]').html(),
+        pubDate: $('[name="pubDate"] input').val(),
+        expirationDate: $('[name="expirationDate"] input').val(),
         filledDate:'',
         source:'/',
         sourceText:'More Info'
@@ -174,6 +207,7 @@ function handleDelete() {
 
 	firebase.database().ref('jobs').child(messageId).remove();
 }
+
 
 
 
