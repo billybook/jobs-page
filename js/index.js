@@ -131,10 +131,18 @@ function setup() {
 
 function handleRegistration() {
 	console.log('register');
+    var displayName = $('input[name="displayName"]').val();
 	var email = $('input[name="email"]').val();
 	var password = $('input[name="password"]').val();
 
-	firebase.auth().createUserWithEmailAndPassword(email, password);
+	firebase.auth().createUserWithEmailAndPassword(email, password).then(function(result) {
+        // The firebase.User instance:
+        var user = result.user;
+        firebase.database().ref('users/' + user.uid).set({
+            email: user.email,
+            usertype:''
+        });
+    });
 }
 
 function handleLogin() {
@@ -186,7 +194,8 @@ function handleAddJob () {
 	//if (message){
     firebase.database().ref('jobs').push({
         guid:3,
-        status: 'submitted',
+        uid: model.user.uid,
+        status: 'pending',
         title: $('input[name="title"]').val(),
         organization: $('input[name="organization"]').val(),
         location: $('input[name="location"]').val(),
