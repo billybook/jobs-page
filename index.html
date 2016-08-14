@@ -13,10 +13,11 @@
 		<div id="loginForm">
 			<script id="login-template" type="text/x-handlebars-template">
 				{{#if loggedIn}}
-					<h3>Welcome {{user.email}}</h3>
+					<h3>Welcome {{#if user.displayName}}{{user.displayName}}{{else}}{{user.email}}{{/if}}</h3>
 					<input id="signOut" type="submit" value="Sign Out" />
 				{{else}}
 					<h3>Register/Login</h3>
+					<!--<input name="displayName" type="text" placeholder="Name" />-->
 					<input name="email" type="email" placeholder="Email Address" />
 					<input name="password" type="password" placeholder="Password" />
 					<button id="register" type="submit" value="Register">Register</button>
@@ -30,7 +31,7 @@
 			<div id="jobsList">
 				<script id="jobs-list-template" type="text/x-handlebars-template">
 					{{#each jobs}}
-						<div class="posting" postingID="{{guid}}" data-id="{{@key}}">
+						<div class="posting {{status}}" postingID="{{guid}}" data-id="{{@key}}">
 							<a>{{title}}</a><br />
 							{{organization}}<br />
 							{{location}}<br />
@@ -46,13 +47,13 @@
 
 			<div id="currentPosting">
 				<script id="current-job-template" type="text/x-handlebars-template">
-					<div postingID="{{guid}}" data-id="{{key}}">
+					<div postingID="{{guid}}" data-id="{{key}}" class="{{status}}">
 						<input name="title" placeholder="Job Title" type="text" value="{{title}}"/>
 						<input name="organization" placeholder="Company" type="text" value="{{organization}}" />
 						<input name="location" placeholder="Location" type="text" value="{{location}}" />
 						<div name = "pubDate">Date Posted: <input placeholder="" type="text" value="{{pubDate}}" class="datepicker" /></div>
 						<div name = "expirationDate">Closing Date: <input placeholder="" type="text" value="{{expirationDate}}" class="datepicker" /></div>
-						<div name="description">{{#if description}}{{{description}}}{{else}}<p> </p>{{/if}}</div>
+						<div name="description">{{#if description}}{{{description}}}{{else}}<p></p>{{/if}}</div>
 
 						{{#unless status}}<button id="addJob" type="submit">Add</button>{{else}}<button class="edit">Edit</button><button class="delete">X</button>{{/unless}}
 					</div>
