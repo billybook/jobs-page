@@ -2,8 +2,9 @@
 var model= {
     user: {},
     jobs: [
-        {
+        /*{
             guid:1,
+            uid: '',
             status: '',
             title:'Job 1',
             organization:'CREC',
@@ -14,20 +15,7 @@ var model= {
             filledDate:'',
             source:'/',
             sourceText:'More Info'
-        },
-        {
-            guid:2,
-            status: '',
-            title:'Job 2',
-            organization:'C2ER',
-            location:'Rosslyn, VA',
-            description:'Job Desc',
-            pubDate:'4/2/2016',
-            expirationDate:'4/28/2016',
-            filledDate:'',
-            source:'/',
-            sourceText:'More Info'
-        }
+        }*/
     ]
 }
 
@@ -126,7 +114,7 @@ function setup() {
 
 
     $('#jobsList').on('click', '.posting', renderCurrentJob);
-    $('#addNew').on('click', renderCurrentJob);
+    $('body').on('click', '#addNew', renderCurrentJob);
 }
 
 function handleRegistration() {
@@ -137,7 +125,8 @@ function handleRegistration() {
 
 	firebase.auth().createUserWithEmailAndPassword(email, password).then(function(result) {
         // The firebase.User instance:
-        var user = result.user;
+        var user = result;
+        user.updateProfile({displayName: displayName});
         firebase.database().ref('users/' + user.uid).set({
             email: user.email,
             usertype:''
@@ -178,20 +167,7 @@ function handleAuthStateChange() {
 
 
 function handleAddJob () {
-    /*model.jobs.push({
-        guid:3,
-        title: $('input[name="title"]').val(),
-        organization: $('input[name="organization"]').val(),
-        location: $('input[name="location"]').val(),
-        description: $('textarea[name="description"]').val(),
-        pubDate: Date.parse($('input[name="datePosted"]').val()),
-        expirationDate: Date.parse($('input[name="dateExpires"]').val()),
-        filledDate:'',
-        source:'/',
-        sourceText:'More Info'
-    })*/
 	console.log('add job');
-	//if (message){
     firebase.database().ref('jobs').push({
         guid:3,
         uid: model.user.uid,
@@ -206,8 +182,7 @@ function handleAddJob () {
         source:'/',
         sourceText:'More Info'
 		});
-	//}
-    //renderJobsList();
+    $('#currentPosting').empty();
 }
 
 function handleDelete() {
@@ -215,6 +190,7 @@ function handleDelete() {
 	var messageId = $(this).parent().attr('data-id');
 
 	firebase.database().ref('jobs').child(messageId).remove();
+    $('#currentPosting').empty();
 }
 
 

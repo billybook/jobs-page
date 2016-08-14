@@ -14,10 +14,12 @@
 			<script id="login-template" type="text/x-handlebars-template">
 				{{#if loggedIn}}
 					<h3>Welcome {{#if user.displayName}}{{user.displayName}}{{else}}{{user.email}}{{/if}}</h3>
+
+					<button id="addNew">Add New</button>
 					<input id="signOut" type="submit" value="Sign Out" />
 				{{else}}
 					<h3>Register/Login</h3>
-					<!--<input name="displayName" type="text" placeholder="Name" />-->
+					<input name="displayName" type="text" placeholder="Name" />
 					<input name="email" type="email" placeholder="Email Address" />
 					<input name="password" type="password" placeholder="Password" />
 					<button id="register" type="submit" value="Register">Register</button>
@@ -26,7 +28,6 @@
 			</script>
 		</div>
 		<h1>C2ER Member Jobs Page</h1>
-		<button id="addNew">Add New</button>
 		<div id="jobsData">
 			<div id="jobsList">
 				<script id="jobs-list-template" type="text/x-handlebars-template">
@@ -59,17 +60,6 @@
 					</div>
 				</script>
 			</div>
-
-			<!--<div id="jobForm">
-				<input name="title" placeholder="Job Title" type="text" />
-				<input name="organization" placeholder="Company" type="text" />
-				<input name="location" placeholder="Location" type="text" />
-				<input name="pubDate" placeholder="" type="text" class="datepicker" />
-				<input name="expirationDate" placeholder="" type="text" class="datepicker" />
-				<div name="description"></div>
-
-				<button id="addJob" type="submit">Add</button>
-			</div>-->
 		</div>
 
 
