@@ -67,6 +67,9 @@ function renderNewJob () {
 function processJobs (snapshot){
 	console.log('db update callback');
 	model.jobs = snapshot.val();
+    for(var index in model.jobs) {
+        model.jobs[index].canEdit = model.user && (model.jobs[index].uid===model.user.uid || model.user.usertype ==='admin'); 
+    }
 	renderJobsList();
 }
 
@@ -126,8 +129,8 @@ function handleRegistration() {
 	firebase.auth().createUserWithEmailAndPassword(email, password).then(function(result) {
         // The firebase.User instance:
         var user = result;
-        user.updateProfile({displayName: displayName});
         firebase.database().ref('users/' + user.uid).set({
+            displayName: displayName,
             email: user.email,
             usertype:''
         });
@@ -154,15 +157,23 @@ function handleAuthStateChange() {
 	if (user) {
 		model.loggedIn = true;
 		model.user = user;
+        firebase.database().ref('/users/' + user.uid).once('value').then(function(snapshot) {
+            model.user.displayName = snapshot.val().displayName;
+            model.user.usertype = snapshot.val().usertype;
+
+            renderLogin();
+            firebase.database().ref('jobs').once('value', processJobs);
+        });
 
         //TODO:  Reload view to show users drafts/pending
 		//firebase.database().ref('jobs').on('value', processMessages);
 	} else {
 		model.loggedIn = false;
 		model.user = user;
+
+        renderLogin();
+        firebase.database().ref('jobs').once('value', processJobs);
 	}
-	renderLogin();
-	//renderChat();
 }
 
 

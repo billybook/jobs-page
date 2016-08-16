@@ -56,7 +56,13 @@
 						<div name = "expirationDate">Closing Date: <input placeholder="" type="text" value="{{expirationDate}}" class="datepicker" /></div>
 						<div name="description">{{#if description}}{{{description}}}{{else}}<p></p>{{/if}}</div>
 
-						{{#unless status}}<button id="addJob" type="submit">Add</button>{{else}}<button class="edit">Edit</button><button class="delete">X</button>{{/unless}}
+						{{#unless status}}
+							<button id="addJob" type="submit">Add</button>
+						{{else}}
+							{{#if canEdit}}
+								<button class="edit">Edit</button><button class="delete">X</button>
+							{{/if}}
+						{{/unless}}
 					</div>
 				</script>
 			</div>
