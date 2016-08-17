@@ -51,13 +51,13 @@
 						<input name="title" placeholder="Job Title" type="text" value="{{title}}"/>
 						<input name="organization" placeholder="Company" type="text" value="{{organization}}" />
 						<input name="location" placeholder="Location" type="text" value="{{location}}" />
-						<div name = "pubDate">Date Posted: <input placeholder="" type="text" value="{{pubDate}}" class="datepicker" /></div>
-						<div name = "expirationDate">Closing Date: <input placeholder="" type="text" value="{{expirationDate}}" class="datepicker" /></div>
+						<div name = "pubDate">Date Posted: <input placeholder="" type="text" value="{{formatDate pubDate}}" class="datepicker" /></div>
+						<div name = "expirationDate">Closing Date: <input placeholder="" type="text" value="{{#if expirationDate}}{{formatDate expirationDate}}{{/if}}" class="datepicker" /></div>
 						<div name="description">{{#if description}}{{{description}}}{{else}}<p></p>{{/if}}</div>
 
 						{{#unless status}}
 							<button id="addJob" type="submit">Add</button>
-							<input name="postingFile" type="file">
+							<input name="fileUpload" type="file">
 						{{else}}
 								<button class="edit">Edit</button><button class="delete">X</button>
 							{{#if canEdit}}

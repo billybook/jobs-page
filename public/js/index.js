@@ -1,7 +1,6 @@
 // Model
 var model= {
     user: {},
-    nextGUID: 0,
     jobs: [
         /*{
             guid:1,
@@ -62,9 +61,6 @@ function renderJobsList () {
 
 function processJobs (snapshot){
 	console.log('db update callback');
-    firebase.database().ref('jobs').limitToLast(1).once('value', function(lastJob){
-        model.nextGUID = lastJob.val()[Object.keys(lastJob.val())].guid + 1;
-    });
     model.jobs = [];
     snapshot.forEach(function(job){
         canEdit = '';
@@ -95,11 +91,16 @@ function renderCurrentJob () {
     var currentJob = model.jobs.filter(function( obj ) {
         return obj.key == currentKey;
     });
+    if (!currentJob[0]) {
+        currentJob[0] = {pubDate: Date.now()}
+    }
     var currentJobHTML = currentJobTemplate(currentJob[0]);
 
     $('#currentPosting').html(currentJobHTML);
 
-    $('.datepicker').datepicker();
+    $('.datepicker').datepicker({
+        dateFormat: "MM d, yy"
+    });
     tinymce.init({
         selector: '[name="description"]',
         menubar: false,
@@ -127,6 +128,7 @@ function setup() {
     //DB Interaction
     $('#currentPosting').on('click', '#addJob', handleAddJob);
     $('#currentPosting').on('click', '[name="status"]', handleApproveJob);
+    $('#currentPosting').on('change', '[name="fileUpload"]', handleFileUpload);
 	$('#currentPosting').on('click', '.delete', handleDelete);
 
 
@@ -192,24 +194,47 @@ function handleAuthStateChange() {
 
 }
 
+function handleFileUpload () {
+    var selectedFile = $(this)[0].files[0];
+    console.log('upload file '+selectedFile.name);
+    var uploadJob = firebase.storage().ref('jobs/'+selectedFile.name).put(selectedFile);
+
+    uploadJob.on('state_changed', function(snapshot){
+        // Observe state change events such as progress, pause, and resume
+        // See below for more detail
+    }, function (error) {
+        console.log(error);
+        // Handle unsuccessful uploads
+    }, function () {
+        // Handle successful uploads on complete
+        // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+        var downloadURL = uploadJob.snapshot.downloadURL;
+        console.log(downloadURL);
+    });
+}
+
 function handleAddJob () {
 	console.log('add job');
-    firebase.database().ref('jobs').push({
-        guid:model.nextGUID,
-        uid: model.user.uid,
-        uname: model.user.displayName,
-        status: 0,
-        title: $('input[name="title"]').val(),
-        organization: $('input[name="organization"]').val(),
-        location: $('input[name="location"]').val(),
-        description: $('div[name="description"]').html(),
-        dateSort: Date.parse($('[name="pubDate"] input').val() + '  07:00:00 +0400')*-1,
-        pubDate: Date.parse($('[name="pubDate"] input').val() + '  07:00:00 +0400'),
-        expirationDate: ($('[name="expirationDate"] input').val()) ? Date.parse($('[name="expirationDate"] input').val() + '  20:00:00 +0400') : null,
-        filledDate:'',
-        source:'/',
-        sourceText:'More Info'
-		});
+    firebase.database().ref('jobs').limitToLast(1).once('value', function(lastJob){
+        nextGUID = lastJob.val()[Object.keys(lastJob.val())].guid + 1;
+        firebase.database().ref('jobs').push({
+            guid:nextGUID,
+            uid: model.user.uid,
+            uname: model.user.displayName,
+            status: 0,
+            title: $('input[name="title"]').val(),
+            organization: $('input[name="organization"]').val(),
+            location: $('input[name="location"]').val(),
+            description: $('div[name="description"]').html(),
+            dateSort: Date.parse($('[name="pubDate"] input').val() + '  07:00:00 +0400')*-1,
+            pubDate: Date.parse($('[name="pubDate"] input').val() + '  07:00:00 +0400'),
+            expirationDate: ($('[name="expirationDate"] input').val()) ? Date.parse($('[name="expirationDate"] input').val() + '  20:00:00 +0400') : null,
+            filledDate:'',
+            source:'/',
+            sourceText:'More Info'
+        });
+    });
+
     $('#currentPosting').empty();
 }
 function handleApproveJob (){
