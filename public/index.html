@@ -31,24 +31,23 @@
 		<div id="jobsData">
 			<div id="jobsList">
 				<script id="jobs-list-template" type="text/x-handlebars-template">
-					{{#each jobs}}
-						<div class="posting {{status}}" postingID="{{guid}}" data-id="{{@key}}">
-							<a>{{title}}</a><br />
-							{{organization}}<br />
-							{{location}}<br />
-							Date Posted: {{formatDate pubDate}}
-							{{#if expirationDate}}
-							<br />Closing Date: {{formatDate expirationDate}}
-							{{/if}}
-						</div>
-					{{/each}}
+					<div class="posting {{#unless status}}pending{{else}}approved{{/unless}}" postingID="{{guid}}" data-id="{{key}}">
+						<a>{{title}}</a><br />
+						{{organization}}<br />
+						{{location}}<br />
+						Date Posted: {{formatDate pubDate}}
+						{{#if expirationDate}}
+						<br />Closing Date: {{formatDate expirationDate}}
+						{{/if}}
+					</div>
 				</script>
 			</div>
 
 
 			<div id="currentPosting">
 				<script id="current-job-template" type="text/x-handlebars-template">
-					<div postingID="{{guid}}" data-id="{{key}}" class="{{status}}">
+					<div postingID="{{guid}}" data-id="{{key}}" class="{{#unless status}}pending{{else}}approved{{/unless}}">
+						<input name="status" type="checkbox" {{#if status}}checked{{/if}}/>
 						<input name="title" placeholder="Job Title" type="text" value="{{title}}"/>
 						<input name="organization" placeholder="Company" type="text" value="{{organization}}" />
 						<input name="location" placeholder="Location" type="text" value="{{location}}" />
@@ -58,6 +57,7 @@
 
 						{{#unless status}}
 							<button id="addJob" type="submit">Add</button>
+							<input name="postingFile" type="file">
 						{{else}}
 								<button class="edit">Edit</button><button class="delete">X</button>
 							{{#if canEdit}}
