@@ -14,7 +14,7 @@ var model= {
             add: false,
             edit: true,
             update: true,
-            approve: true,
+            approve: false,
             remove: true,
             delete: false
         },
@@ -125,25 +125,39 @@ function processJobs (snapshot){
 
 function renderCurrentJob () {
     console.log('show job');
-    model.currentKey = (model.currentKey) ? model.currentKey : $(this).attr('data-id');
-    console.log(model.currentKey);
+    model.currentKey = ($(this).attr('data-id')) ? $(this).attr('data-id') :
+                        ($(this).hasClass('addNew')) ? '' : model.currentKey ;
     
-    var currentJob = model.jobs.filter(function( obj ) {
-        return obj.key == model.currentKey;
-    });
-    if (!currentJob[0]) {
+    if (model.currentKey) {
+        var currentJob = model.jobs.filter(function( obj ) {
+            return obj.key == model.currentKey;
+        });
+    } else if ($(this).hasClass('addNew')) {
         var tempDate = new Date();
-        console.log(tempDate.getDate());
-        currentJob[0] = {pubDate: tempDate,canEdit: 'new'}
+        currentJob = [{pubDate: tempDate,canEdit: 'new'}];
     }
-    currentJob[0].editTypes = model.editTypes[currentJob[0].canEdit];
-    var currentJobHTML = currentJobTemplate(currentJob[0]);
 
-    $('#currentPosting').html(currentJobHTML);
+    if (currentJob) {
+        currentJob[0].editTypes = model.editTypes[currentJob[0].canEdit];
+        var currentJobHTML = currentJobTemplate(currentJob[0]);
 
-    $('.datepicker').datepicker({
-        dateFormat: "MM d, yy"
-    });
+        $('#currentPosting').html(currentJobHTML);
+
+        $('.datepicker').datepicker({
+            dateFormat: "MM d, yy"
+        });
+        if ($(this).hasClass('addNew')) {
+            tinymce.init({
+                selector: '[name="description"]',
+                menubar: false,
+                toolbar: 'undo redo styleselect bold italic bullist numlist code', //alignleft aligncenter alignright outdent indent
+                plugins: 'code',
+                inline: true
+            });
+        }
+    } else {
+        $('#currentPosting').empty();     
+    }
 }
 
 
@@ -344,7 +358,7 @@ function handleEditToggle () {
         });
     } else {
         model.currentKey = $(this).closest('[data-id]').attr('data-id');
-        renderCurrentJob();    
+        renderCurrentJob();
     }
 }
 
