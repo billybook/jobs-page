@@ -15,15 +15,15 @@
 				{{#if loggedIn}}
 					<h3>Welcome {{#if user.displayName}}{{user.displayName}}{{else}}{{user.email}}{{/if}}</h3>
 
-					<button id="addNew">Add New</button>
-					<input id="signOut" type="submit" value="Sign Out" />
+					<button class="addNew">Add New</button>
+					<input class="signOut" type="submit" value="Sign Out" />
 				{{else}}
 					<h3>Register/Login</h3>
 					<input name="displayName" type="text" placeholder="Name" />
 					<input name="email" type="email" placeholder="Email Address" />
 					<input name="password" type="password" placeholder="Password" />
-					<button id="register" type="submit" value="Register">Register</button>
-					<button id="login" type="submit" value="Login">Login</button>
+					<button class="register" type="submit" value="Register">Register</button>
+					<button class="login" type="submit" value="Login">Login</button>
 				{{/if}}
 			</script>
 		</div>
@@ -47,16 +47,36 @@
 			<div id="currentPosting">
 				<script id="current-job-template" type="text/x-handlebars-template">
 					<div postingID="{{guid}}" data-id="{{key}}" class="{{#unless status}}pending{{else}}approved{{/unless}} {{canEdit}}">
-						<input name="title" placeholder="Job Title" type="text" value="{{title}}"/>
-						<input name="organization" placeholder="Company" type="text" value="{{organization}}" />
-						<input name="location" placeholder="Location" type="text" value="{{location}}" />
-						<div name = "pubDate">Date Posted: <input placeholder="" type="text" value="{{formatDate pubDate}}" class="datepicker" /></div>
-						<div name = "expirationDate">Closing Date: <input placeholder="" type="text" value="{{#if expirationDate}}{{formatDate expirationDate}}{{/if}}" class="datepicker" /></div>
-						<div name="description">{{#if description}}{{{description}}}{{else}}<p></p>{{/if}}</div>
+						<div class="postingInfo">
+							<input name="title" placeholder="Job Title" type="text" value="{{title}}" {{#unless editTypes.add}}disabled{{/unless}} />
+							<input name="organization" placeholder="Company" type="text" value="{{organization}}" {{#unless editTypes.add}}disabled{{/unless}} />
+							<input name="location" placeholder="Location" type="text" value="{{location}}" {{#unless editTypes.add}}disabled{{/unless}} />
+							<div name = "pubDate">Date Posted: <input placeholder="" type="text" value="{{formatDate pubDate}}" class="datepicker" {{#unless editTypes.add}}disabled{{/unless}} /></div>
+							<div name = "expirationDate">Closing Date: <input placeholder="" type="text" value="{{#if expirationDate}}{{formatDate expirationDate}}{{/if}}" class="datepicker" {{#unless editTypes.add}}disabled{{/unless}} /></div>
+							<div name="description">{{#if description}}{{{description}}}{{else}}<p></p>{{/if}}</div>
+						</div>
+
 						<a name="moreInfo" href="{{source}}" class="btn">More Info</a>
-						<input name="source" placeholder="past link to job here" type="text" value="{{source}}" />
-						<input name="fileUpload" type="file" />
-						<button id="addJob" type="submit">Add</button><button class="edit">Edit</button><button class="update">Update</button><button class="approve">Approve</button><button class="remove">Remove</button><button class="delete">X</button>
+
+						<div class="noneditControls">
+							<div class="buttons">
+								{{#if editTypes.edit}}<button class="edit">Edit</button>{{/if}}
+								{{#if editTypes.approve}}<button class="approve">Approve</button>{{/if}}
+								{{#if editTypes.remove}}<button class="remove">Remove</button>{{/if}}
+							</div>
+						</div>
+						<div class="editControls">
+							<div class="sourceInfo">
+								<input name="source" placeholder="past link to job here" type="text" value="{{source}}" />
+								<input name="fileUpload" type="file" />
+							</div>
+
+							<div class="buttons">
+								{{#if editTypes.add}}<button class="addJob" type="submit">Add</button>{{/if}}
+								{{#if editTypes.update}}<button class="update">Update</button>{{/if}}
+								{{#if editTypes.edit}}<button class="cancel">Cancel</button>{{/if}}
+							</div>
+						</div>
 					</div>
 				</script>
 			</div>

@@ -1,6 +1,33 @@
 // Model
 var model= {
     user: {},
+    editTypes: {
+        new: {
+            add: true,
+            edit: false,
+            update: false,
+            approve: false,
+            remove: false,
+            delete: false
+        },
+        user: {
+            add: false,
+            edit: true,
+            update: true,
+            approve: true,
+            remove: true,
+            delete: false
+        },
+        admin: {
+            add: false,
+            edit: true,
+            update: true,
+            approve: true,
+            remove: true,
+            delete: true
+        }
+    },
+    currentJob: '',
     jobs: [
         /*{
             guid:1,
@@ -57,8 +84,9 @@ function renderJobsList () {
         var jobsListHTML = jobsListTemplate(job);
         $('#jobsList').append(jobsListHTML);
     });
-    if (model.currentJob) {
-        $('#jobsList [data-id]').click();
+
+    if (model.currentKey) {
+        renderCurrentJob();
     }
 }
 
@@ -70,7 +98,14 @@ function processJobs (snapshot){
         if (model.user) {
             canEdit = (model.user.usertype ==='admin') ? 'admin' : (job.val().uid===model.user.uid) ? 'user' : '';
         }
-        if (job.val().status || canEdit) {
+        expiry = (job.val().expirationDate) ? job.val().expirationDate : job.val().pubDate + 45*(24*60*60*1000);
+        notExpired = Date.now() < expiry ;
+        
+        expiry = new Date(expiry);
+        console.log (monthNames[expiry.getMonth()] + ' ' + expiry.getDate() + ', ' + expiry.getFullYear());
+
+        notFilled = !job.val().filledDate;
+        if (notExpired && notFilled && (job.val().status || canEdit)) {
             jobTemp = job.val();
             jobTemp.key = job.key;
             jobTemp.canEdit = canEdit;
@@ -90,7 +125,8 @@ function processJobs (snapshot){
 
 function renderCurrentJob () {
     console.log('show job');
-    model.currentKey = $(this).attr('data-id');
+    model.currentKey = (model.currentKey) ? model.currentKey : $(this).attr('data-id');
+    console.log(model.currentKey);
     
     var currentJob = model.jobs.filter(function( obj ) {
         return obj.key == model.currentKey;
@@ -100,19 +136,13 @@ function renderCurrentJob () {
         console.log(tempDate.getDate());
         currentJob[0] = {pubDate: tempDate,canEdit: 'new'}
     }
+    currentJob[0].editTypes = model.editTypes[currentJob[0].canEdit];
     var currentJobHTML = currentJobTemplate(currentJob[0]);
 
     $('#currentPosting').html(currentJobHTML);
 
     $('.datepicker').datepicker({
         dateFormat: "MM d, yy"
-    });
-    tinymce.init({
-        selector: '[name="description"]',
-        menubar: false,
-        toolbar: 'undo redo styleselect bold italic bullist numlist code', //alignleft aligncenter alignright outdent indent
-        plugins: 'code',
-        inline: true
     });
 }
 
@@ -126,20 +156,24 @@ function setup() {
     renderJobsList();
 
     //Auth
-	$('#loginForm').on('click', '#register', handleRegistration);
-	$('#loginForm').on('click', '#login', handleLogin);
-	$('#loginForm').on('click', '#signOut', handleSignOut);
+	$('#loginForm').on('click', '.register', handleRegistration);
+	$('#loginForm').on('click', '.login', handleLogin);
+	$('#loginForm').on('click', '.signOut', handleSignOut);
 	firebase.auth().onAuthStateChanged(handleAuthStateChange);
 
     //DB Interaction
-    $('#currentPosting').on('click', '#addJob', handleAddJob);
+    $('#currentPosting').on('click', '.addJob', handleAddJob);
+    $('#currentPosting').on('click', '.update', handleUpdateJob);
     $('#currentPosting').on('click', '.approve', handleApproveJob);
+    $('#currentPosting').on('click', '.remove', handleRemoveJob);
     $('#currentPosting').on('change', '[name="fileUpload"]', handleFileUpload);
-	$('#currentPosting').on('click', '.delete', handleDelete);
+
+    $('#currentPosting').on('click', '.edit', handleEditToggle);
+    $('#currentPosting').on('click', '.cancel', handleEditToggle);
 
 
     $('#jobsList').on('click', '.posting', renderCurrentJob);
-    $('body').on('click', '#addNew', renderCurrentJob);
+    $('#loginForm').on('click', '.addNew', renderCurrentJob);
 }
 
 function handleRegistration() {
@@ -235,7 +269,7 @@ function handleFileUpload () {
 function handleAddJob () {
 	console.log('add job');
     firebase.database().ref('jobs').limitToLast(1).once('value', function(lastJob){
-        nextGUID = lastJob.val()[Object.keys(lastJob.val())].guid + 1;
+        nextGUID = (lastJob.val()) ? lastJob.val()[Object.keys(lastJob.val())].guid + 1 : 0 ;
         firebase.database().ref('jobs').push({
             guid:nextGUID,
             uid: model.user.uid,
@@ -257,20 +291,62 @@ function handleAddJob () {
 
     $('#currentPosting').empty();
 }
+function handleUpdateJob () {
+	console.log('update job');
+    var jobId = $(this).closest('[data-id]').attr('data-id');
+    model.currentKey = jobId;
+
+    firebase.database().ref('jobs/'+jobId).update({
+        title: $('input[name="title"]').val(),
+        organization: $('input[name="organization"]').val(),
+        location: $('input[name="location"]').val(),
+        description: $('div[name="description"]').html(),
+        dateSort: Date.parse($('[name="pubDate"] input').val() + '  07:00:00 +0400')*-1,
+        pubDate: Date.parse($('[name="pubDate"] input').val() + '  07:00:00 +0400'),
+        expirationDate: ($('[name="expirationDate"] input').val()) ? Date.parse($('[name="expirationDate"] input').val() + '  20:00:00 +0400') : null,
+        source:$('input[name="source"]').val(),
+    });
+}
+
 function handleApproveJob (){
     console.log('approve job');
     var jobId = $(this).closest('[data-id]').attr('data-id');
+    model.currentKey = jobId;
 
-    firebase.database().ref('jobs/'+jobId+'/status').set(1);
+    var confirmed = confirm("Are you sure you want to approve this posting?");
+    if (confirmed) {
+        firebase.database().ref('jobs/'+jobId+'/status').set(1);
+    }
 }
-function handleDelete() {
-	console.log('delete');
-	var jobId = $(this).closest('[data-id]').attr('data-id');
+function handleRemoveJob (){
+    console.log('remove job '+Date.now());
+    var jobId = $(this).closest('[data-id]').attr('data-id');
 
-	firebase.database().ref('jobs').child(jobId).remove();
+    var confirmed = confirm("Are you sure you want to take down this posting?");
+    if (confirmed) {
+        firebase.database().ref('jobs/'+jobId+'/filledDate').set(Date.now());
+    }
+
     $('#currentPosting').empty();
 }
 
+function handleEditToggle () {
+    $(this).closest('[postingid]').toggleClass('editing');
+    
+    if ($(this).hasClass('edit')) {
+        $('#currentPosting input').prop('disabled', false);
+        tinymce.init({
+            selector: '[name="description"]',
+            menubar: false,
+            toolbar: 'undo redo styleselect bold italic bullist numlist code', //alignleft aligncenter alignright outdent indent
+            plugins: 'code',
+            inline: true
+        });
+    } else {
+        model.currentKey = $(this).closest('[data-id]').attr('data-id');
+        renderCurrentJob();    
+    }
+}
 
 
 function cleanName(name) {
