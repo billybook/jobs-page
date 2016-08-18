@@ -54,14 +54,13 @@
 						<div name = "pubDate">Date Posted: <input placeholder="" type="text" value="{{formatDate pubDate}}" class="datepicker" /></div>
 						<div name = "expirationDate">Closing Date: <input placeholder="" type="text" value="{{#if expirationDate}}{{formatDate expirationDate}}{{/if}}" class="datepicker" /></div>
 						<div name="description">{{#if description}}{{{description}}}{{else}}<p></p>{{/if}}</div>
-
+						<a name="moreInfo" href="{{source}}" class="btn">More Info</a>
+						<input name="source" placeholder="past link to job here" type="text" value="{{source}}" />
+						<input name="fileUpload" type="file" />
 						{{#unless status}}
 							<button id="addJob" type="submit">Add</button>
-							<input name="fileUpload" type="file">
 						{{else}}
-								<button class="edit">Edit</button><button class="delete">X</button>
-							{{#if canEdit}}
-							{{/if}}
+							<button class="edit">Edit</button><button class="delete">X</button>
 						{{/unless}}
 					</div>
 				</script>

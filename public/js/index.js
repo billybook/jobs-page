@@ -197,20 +197,33 @@ function handleAuthStateChange() {
 function handleFileUpload () {
     var selectedFile = $(this)[0].files[0];
     console.log('upload file '+selectedFile.name);
-    var uploadJob = firebase.storage().ref('jobs/'+selectedFile.name).put(selectedFile);
+    if ( $('input[name="title"]').val() && $('input[name="organization"]').val() && $('[name="pubDate"] input').val()) {
+        var pubDate = new Date($('[name="pubDate"] input').val());
+        var nameExt = selectedFile.name.split('.');
+        
+        var monthTemp = (pubDate.getMonth() <10) ? '0'+pubDate.getMonth() : pubDate.getMonth();
+        var newFileName = pubDate.getFullYear() + '-' + monthTemp + '-' + pubDate.getDate() + '-';
+            newFileName + encodeURIComponent(cleanName($('input[name="title"]').val())) + '-';
+            newFileName += encodeURIComponent(cleanName($('input[name="organization"]').val()));
+            newFileName += '.' + nameExt[nameExt.length -1];
+        
+        var uploadJob = firebase.storage().ref('jobs/'+newFileName).put(selectedFile);
 
-    uploadJob.on('state_changed', function(snapshot){
-        // Observe state change events such as progress, pause, and resume
-        // See below for more detail
-    }, function (error) {
-        console.log(error);
-        // Handle unsuccessful uploads
-    }, function () {
-        // Handle successful uploads on complete
-        // For instance, get the download URL: https://firebasestorage.googleapis.com/...
-        var downloadURL = uploadJob.snapshot.downloadURL;
-        console.log(downloadURL);
-    });
+        uploadJob.on('state_changed', function(snapshot){
+            // Observe state change events such as progress, pause, and resume
+            // See below for more detail
+        }, function (error) {
+            console.log(error);
+            // Handle unsuccessful uploads
+        }, function () {
+            // Handle successful uploads on complete
+            // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+            var downloadURL = uploadJob.snapshot.downloadURL;
+            console.log(downloadURL);
+            $('[name="source"]').val(downloadURL);
+            $('[name="moreInfo"]').attr('href', downloadURL);
+        });
+    }
 }
 
 function handleAddJob () {
@@ -230,7 +243,7 @@ function handleAddJob () {
             pubDate: Date.parse($('[name="pubDate"] input').val() + '  07:00:00 +0400'),
             expirationDate: ($('[name="expirationDate"] input').val()) ? Date.parse($('[name="expirationDate"] input').val() + '  20:00:00 +0400') : null,
             filledDate:'',
-            source:'/',
+            source:$('input[name="source"]').val(),
             sourceText:'More Info'
         });
     });
@@ -239,19 +252,29 @@ function handleAddJob () {
 }
 function handleApproveJob (){
     console.log('approve job');
-    var jobId = $(this).parent().attr('data-id');
+    var jobId = $(this).closest('[data-id]').attr('data-id');
     var status = ($(this).is(":checked")) ? 1 : 0;
 
     firebase.database().ref('jobs/'+jobId+'/status').set(status);
 }
 function handleDelete() {
 	console.log('delete');
-	var jobId = $(this).parent().attr('data-id');
+	var jobId = $(this).closest('[data-id]').attr('data-id');
 
 	firebase.database().ref('jobs').child(jobId).remove();
     $('#currentPosting').empty();
 }
 
+
+
+function cleanName(name) {
+    var chars = [' ','/','(', ')', '\\', '&', ','];
+    chars.forEach(function(char){
+        name = name.split(char);
+        name = name.join('');
+    });
+    return name;
+}
 
 
 
