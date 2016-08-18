@@ -46,8 +46,7 @@
 
 			<div id="currentPosting">
 				<script id="current-job-template" type="text/x-handlebars-template">
-					<div postingID="{{guid}}" data-id="{{key}}" class="{{#unless status}}pending{{else}}approved{{/unless}}">
-						<input name="status" type="checkbox" {{#if status}}checked{{/if}}/>
+					<div postingID="{{guid}}" data-id="{{key}}" class="{{#unless status}}pending{{else}}approved{{/unless}} {{canEdit}}">
 						<input name="title" placeholder="Job Title" type="text" value="{{title}}"/>
 						<input name="organization" placeholder="Company" type="text" value="{{organization}}" />
 						<input name="location" placeholder="Location" type="text" value="{{location}}" />
@@ -57,11 +56,7 @@
 						<a name="moreInfo" href="{{source}}" class="btn">More Info</a>
 						<input name="source" placeholder="past link to job here" type="text" value="{{source}}" />
 						<input name="fileUpload" type="file" />
-						{{#unless status}}
-							<button id="addJob" type="submit">Add</button>
-						{{else}}
-							<button class="edit">Edit</button><button class="delete">X</button>
-						{{/unless}}
+						<button id="addJob" type="submit">Add</button><button class="edit">Edit</button><button class="update">Update</button><button class="approve">Approve</button><button class="remove">Remove</button><button class="delete">X</button>
 					</div>
 				</script>
 			</div>

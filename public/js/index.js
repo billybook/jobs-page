@@ -30,7 +30,7 @@ var monthNames = [
 
 Handlebars.registerHelper('formatDate', function(date) {
   var date = new Date(date);
-  date = monthNames[date.getUTCMonth()] + ' ' + date.getUTCDate() + ', ' + date.getUTCFullYear();
+  date = monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
 
   return date;
 });
@@ -57,6 +57,9 @@ function renderJobsList () {
         var jobsListHTML = jobsListTemplate(job);
         $('#jobsList').append(jobsListHTML);
     });
+    if (model.currentJob) {
+        $('#jobsList [data-id]').click();
+    }
 }
 
 function processJobs (snapshot){
@@ -87,12 +90,15 @@ function processJobs (snapshot){
 
 function renderCurrentJob () {
     console.log('show job');
-    var currentKey = $(this).attr('data-id');
+    model.currentKey = $(this).attr('data-id');
+    
     var currentJob = model.jobs.filter(function( obj ) {
-        return obj.key == currentKey;
+        return obj.key == model.currentKey;
     });
     if (!currentJob[0]) {
-        currentJob[0] = {pubDate: Date.now()}
+        var tempDate = new Date();
+        console.log(tempDate.getDate());
+        currentJob[0] = {pubDate: tempDate,canEdit: 'new'}
     }
     var currentJobHTML = currentJobTemplate(currentJob[0]);
 
@@ -127,7 +133,7 @@ function setup() {
 
     //DB Interaction
     $('#currentPosting').on('click', '#addJob', handleAddJob);
-    $('#currentPosting').on('click', '[name="status"]', handleApproveJob);
+    $('#currentPosting').on('click', '.approve', handleApproveJob);
     $('#currentPosting').on('change', '[name="fileUpload"]', handleFileUpload);
 	$('#currentPosting').on('click', '.delete', handleDelete);
 
@@ -234,6 +240,7 @@ function handleAddJob () {
             guid:nextGUID,
             uid: model.user.uid,
             uname: model.user.displayName,
+            uemail: model.user.email,
             status: 0,
             title: $('input[name="title"]').val(),
             organization: $('input[name="organization"]').val(),
@@ -253,9 +260,8 @@ function handleAddJob () {
 function handleApproveJob (){
     console.log('approve job');
     var jobId = $(this).closest('[data-id]').attr('data-id');
-    var status = ($(this).is(":checked")) ? 1 : 0;
 
-    firebase.database().ref('jobs/'+jobId+'/status').set(status);
+    firebase.database().ref('jobs/'+jobId+'/status').set(1);
 }
 function handleDelete() {
 	console.log('delete');
