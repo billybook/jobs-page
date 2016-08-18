@@ -289,7 +289,7 @@ function handleAddJob () {
 
     firebase.database().ref('jobs').limitToLast(1).once('value', function(lastJob){
         nextGUID = (lastJob.val()) ? lastJob.val()[Object.keys(lastJob.val())].guid + 1 : 0 ;
-        var link = 'http://c2er.org/jobs/?job=';
+        var link = '?job=';
             link += encodeURIComponent(cleanName($('input[name="title"]').val())) + '_-_';
             link += encodeURIComponent(cleanName($('input[name="organization"]').val()));
             link += '&id=' + nextGUID;
@@ -306,7 +306,6 @@ function handleAddJob () {
             organization: $('input[name="organization"]').val(),
             location: $('input[name="location"]').val(),
             description: $('div[name="description"]').html(),
-            dateSort: Date.parse($('input[name="pubDate"]').val() + '  07:00:00 +0400')*-1,
             pubDate: Date.parse($('input[name="pubDate"]').val() + '  07:00:00 +0400'),
             expirationDate: ($('input[name="expirationDate"]').val()) ? Date.parse($('input[name="expirationDate"]').val() + '  20:00:00 +0400') : null,
             filledDate:'',
@@ -376,7 +375,7 @@ function handleEditToggle () {
 
 
 function cleanName(name) {
-    var chars = [' ','/','(', ')', '\\', '&', ','];
+    var chars = [' ','/','(', ')', '\\', '&', ',', '.'];
     chars.forEach(function(char){
         name = name.split(char);
         name = name.join('');
