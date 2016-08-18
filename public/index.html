@@ -3,6 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Jobs</title>
+		<link href="https://fonts.googleapis.com/css?family=Hind|Lato|Raleway" rel="stylesheet">
 		<link rel="stylesheet" href="css/style.css" />
 		<link rel="stylesheet" href="js/jquery-ui-1.12.0/jquery-ui.css">
 
@@ -13,15 +14,17 @@
 		<div id="loginForm">
 			<script id="login-template" type="text/x-handlebars-template">
 				{{#if loggedIn}}
+					<button class="signOut">Sign Out</button>
 					<h3>Welcome {{#if user.displayName}}{{user.displayName}}{{else}}{{user.email}}{{/if}}</h3>
 
-					<button class="addNew">Add New</button>
-					<input class="signOut" type="submit" value="Sign Out" />
+					<button class="addNew">+ Submit New Job</button>
 				{{else}}
 					<h3>Register/Login</h3>
-					<input name="displayName" type="text" placeholder="Name" />
-					<input name="email" type="email" placeholder="Email Address" />
-					<input name="password" type="password" placeholder="Password" />
+					<div class="editing">
+						<input name="displayName" type="text" placeholder="Name" />
+						<input name="email" type="email" placeholder="Email Address" />
+						<input name="password" type="password" placeholder="Password" />
+					</div>
 					<button class="register" type="submit" value="Register">Register</button>
 					<button class="login" type="submit" value="Login">Login</button>
 				{{/if}}
@@ -46,14 +49,34 @@
 
 			<div id="currentPosting">
 				<script id="current-job-template" type="text/x-handlebars-template">
-					<div postingID="{{guid}}" data-id="{{key}}" class="{{#unless status}}pending{{else}}approved{{/unless}} {{canEdit}}">
+					<div postingID="{{guid}}" data-id="{{key}}" class="{{#unless status}}pending{{else}}approved{{/unless}} {{canEdit}} {{#if editTypes.add}}editing{{/if}}">
+						<button class="back"><- Back to Job List</button>
 						<div class="postingInfo">
-							<input name="title" placeholder="Job Title" type="text" value="{{title}}" {{#unless editTypes.add}}disabled{{/unless}} />
-							<input name="organization" placeholder="Company" type="text" value="{{organization}}" {{#unless editTypes.add}}disabled{{/unless}} />
-							<input name="location" placeholder="Location" type="text" value="{{location}}" {{#unless editTypes.add}}disabled{{/unless}} />
-							<div name = "pubDate">Date Posted: <input placeholder="" type="text" value="{{formatDate pubDate}}" class="datepicker" {{#unless editTypes.add}}disabled{{/unless}} /></div>
-							<div name = "expirationDate">Closing Date: <input placeholder="" type="text" value="{{#if expirationDate}}{{formatDate expirationDate}}{{/if}}" class="datepicker" {{#unless editTypes.add}}disabled{{/unless}} /></div>
-							<div name="description">{{#if description}}{{{description}}}{{else}}<p></p>{{/if}}</div>
+							<div class="titleDiv">
+								<label>Job Title:</label>
+								<input name="title" placeholder="Job Title" type="text" value="{{title}}" {{#unless editTypes.add}}disabled{{/unless}} />
+							</div>
+							<div class="organizationDiv">
+								<label>Organization:</label>
+								<input name="organization" placeholder="Company" type="text" value="{{organization}}" {{#unless editTypes.add}}disabled{{/unless}} />
+							</div>
+							<div class="locationDiv">
+								<label>Job Location:</label>
+								<input name="location" placeholder="City, State" type="text" value="{{location}}" {{#unless editTypes.add}}disabled{{/unless}} />
+							</div>
+							<div class="pubDateDiv">
+								<span>Date Posted:</span>
+								<input name="pubDate" placeholder="" type="text" value="{{formatDate pubDate}}" class="datepicker" {{#unless editTypes.add}}disabled{{/unless}} />
+							</div>
+							<div class="expirationDateDiv {{#unless expirationDate}}hidden{{/unless}}">
+								<span>Closing Date:</span>
+								<input name="expirationDate" placeholder="" type="text" value="{{#if expirationDate}}{{formatDate expirationDate}}{{/if}}" class="datepicker" {{#unless editTypes.add}}disabled{{/unless}} />
+							</div>
+						</div>
+
+						<div class="descriptionDiv">
+							<label>Job Description:</label>
+							<div name="description">{{#if description}}{{{description}}}{{/if}}</div>
 						</div>
 
 						<a name="moreInfo" href="{{source}}" class="btn">More Info</a>
@@ -74,6 +97,7 @@
 							<div class="buttons">
 								{{#if editTypes.add}}<button class="addJob" type="submit">Add</button>{{/if}}
 								{{#if editTypes.update}}<button class="update">Update</button>{{/if}}
+								{{#if editTypes.add}}<button class="cancel">Cancel</button>{{/if}}
 								{{#if editTypes.edit}}<button class="cancel">Cancel</button>{{/if}}
 							</div>
 						</div>

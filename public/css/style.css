@@ -1,10 +1,39 @@
+html {
+    font-size: 16px;
+    font-family: 'Raleway', sans-serif;
+    font-family: 'Hind', sans-serif;
+    font-family: 'Lato', sans-serif;
+}
+button:hover, a:hover {
+    cursor: pointer;
+}
 input {
     margin: .25em 0;
 }
+input, button {
+    font-size: inherit;
+    font-family: inherit;
+    font-style: inherit;
+}
 input, [name="description"] {
     display: block;
+    border: none;
+    margin:0;
+    padding:0;
+    background-color: transparent;
+    color:black;
+}
+
+.signOut {
+    float: right;
+}
+
+.editing input, .editing [name="description"] {
     padding: .25em;
     border: thin solid #999;
+}
+[name="description"] {
+    min-height: 30px;
 }
 [name="description"] p:first-child {
     margin-top:0;
@@ -12,16 +41,90 @@ input, [name="description"] {
 [name="description"] p:last-child {
     margin-bottom:0;
 }
-#jobsData > div {
-    display: table-cell;
+#jobsData {
+    position: relative;
+    width: 100%;
+}
+#currentPosting {
+    position: absolute;
+    width: 100%;
+    min-height: 100%;
+    top:0;
+    left:105%;
+    border:thin solid #ccc;
+    background-color: white;
+    transition: all .45s;
+}
+#currentPosting.show {
+    left:0;
+    box-shadow: 0px 0px 12px 1px #aaa;
 }
 
 #jobsList .posting {
     padding: 1em;
     margin: .25em 0;
+    box-shadow: 0px 0px 12px 1px #aaa;
+    border-radius: 3px;
+    transition: all .25s;
+    background-color:white;
+}
+#jobsList .posting:hover {
+    cursor: pointer;
+    box-shadow: 0px 0px 5px 0px #ccc;
+}
+#jobsList .pending {
+    color: #888;
+}
+#jobsList .pending:before {
+    content: "Pending:";
+    display: block;
+    font-style: italic;
+}
+#currentPosting > div {
+    padding: 1em;
 }
 
-[name="pubDate"] input,
-[name="expirationDate"] input{
-    display:inline-block;
+#currentPosting .editControls,
+#currentPosting .editing [name="moreInfo"],
+#currentPosting .editing .noneditControls,
+#currentPosting .approved .approve,
+#currentPosting .hidden,
+#currentPosting .postingInfo label,
+#currentPosting .descriptionDiv label {
+    display: none;
+}
+#currentPosting .editing .descriptionDiv label {
+    display: block;
+}
+#currentPosting .editing .editControls {
+    display: inline-block;
+}
+
+#currentPosting .editing .postingInfo > *,
+#currentPosting .postingInfo .pubDateDiv,
+#currentPosting .postingInfo .expirationDateDiv:not(.hidden) {
+    display: table-row;
+}
+#currentPosting .editing .postingInfo > * > *,
+#currentPosting .postingInfo .pubDateDiv > *,
+#currentPosting .postingInfo .expirationDateDiv > * {
+    display: table-cell;
+}
+#currentPosting .postingInfo > div > *:first-child {
+    padding-right: 1em;
+}
+
+.titleDiv {
+    font-weight: bold;
+    font-size: 1.5em;
+}
+.organizationDiv, .locationDiv {
+    font-size: 1.25em;
+}
+.locationDiv {
+    margin-bottom:.5em;
+    font-style: italic;
+}
+.descriptionDiv {
+    margin-top: 2em;
 }

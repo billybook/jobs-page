@@ -142,6 +142,7 @@ function renderCurrentJob () {
         var currentJobHTML = currentJobTemplate(currentJob[0]);
 
         $('#currentPosting').html(currentJobHTML);
+        $('#currentPosting').addClass('show');
 
         $('.datepicker').datepicker({
             dateFormat: "MM d, yy"
@@ -156,7 +157,7 @@ function renderCurrentJob () {
             });
         }
     } else {
-        $('#currentPosting').empty();     
+        $('#currentPosting').removeClass('show').empty();     
     }
 }
 
@@ -185,9 +186,12 @@ function setup() {
     $('#currentPosting').on('click', '.edit', handleEditToggle);
     $('#currentPosting').on('click', '.cancel', handleEditToggle);
 
-
     $('#jobsList').on('click', '.posting', renderCurrentJob);
     $('#loginForm').on('click', '.addNew', renderCurrentJob);
+
+    $('#currentPosting').on('click', '.back', function () {
+        $('#currentPosting').removeClass('show');
+    });
 }
 
 function handleRegistration() {
@@ -251,16 +255,16 @@ function handleAuthStateChange() {
 function handleFileUpload () {
     var selectedFile = $(this)[0].files[0];
     console.log('upload file '+selectedFile.name);
-    if ( $('input[name="title"]').val() && $('input[name="organization"]').val() && $('[name="pubDate"] input').val()) {
-        var pubDate = new Date($('[name="pubDate"] input').val());
+    if ( $('input[name="title"]').val() && $('input[name="organization"]').val() && $('input[name="pubDate"]').val()) {
+        var pubDate = new Date($('input[name="pubDate"]').val());
         var nameExt = selectedFile.name.split('.');
         
         var monthTemp = (pubDate.getMonth() <10) ? '0'+pubDate.getMonth() : pubDate.getMonth();
         var newFileName = pubDate.getFullYear() + '-' + monthTemp + '-' + pubDate.getDate() + '-';
-            newFileName + encodeURIComponent(cleanName($('input[name="title"]').val())) + '-';
+            newFileName += encodeURIComponent(cleanName($('input[name="title"]').val())) + '-';
             newFileName += encodeURIComponent(cleanName($('input[name="organization"]').val()));
             newFileName += '.' + nameExt[nameExt.length -1];
-        
+        console.log (newFileName);
         var uploadJob = firebase.storage().ref('jobs/'+newFileName).put(selectedFile);
 
         uploadJob.on('state_changed', function(snapshot){
@@ -282,10 +286,18 @@ function handleFileUpload () {
 
 function handleAddJob () {
 	console.log('add job');
+
     firebase.database().ref('jobs').limitToLast(1).once('value', function(lastJob){
         nextGUID = (lastJob.val()) ? lastJob.val()[Object.keys(lastJob.val())].guid + 1 : 0 ;
+        var link = 'http://c2er.org/jobs/?job=';
+            link += encodeURIComponent(cleanName($('input[name="title"]').val())) + '_-_';
+            link += encodeURIComponent(cleanName($('input[name="organization"]').val()));
+            link += '&id=' + nextGUID;
+        console.log (link);
+
         firebase.database().ref('jobs').push({
             guid:nextGUID,
+            link: link,
             uid: model.user.uid,
             uname: model.user.displayName,
             uemail: model.user.email,
@@ -294,16 +306,16 @@ function handleAddJob () {
             organization: $('input[name="organization"]').val(),
             location: $('input[name="location"]').val(),
             description: $('div[name="description"]').html(),
-            dateSort: Date.parse($('[name="pubDate"] input').val() + '  07:00:00 +0400')*-1,
-            pubDate: Date.parse($('[name="pubDate"] input').val() + '  07:00:00 +0400'),
-            expirationDate: ($('[name="expirationDate"] input').val()) ? Date.parse($('[name="expirationDate"] input').val() + '  20:00:00 +0400') : null,
+            dateSort: Date.parse($('input[name="pubDate"]').val() + '  07:00:00 +0400')*-1,
+            pubDate: Date.parse($('input[name="pubDate"]').val() + '  07:00:00 +0400'),
+            expirationDate: ($('input[name="expirationDate"]').val()) ? Date.parse($('input[name="expirationDate"]').val() + '  20:00:00 +0400') : null,
             filledDate:'',
             source:$('input[name="source"]').val(),
             sourceText:'More Info'
         });
     });
 
-    $('#currentPosting').empty();
+    $('#currentPosting').removeClass('show').empty();
 }
 function handleUpdateJob () {
 	console.log('update job');
@@ -315,9 +327,9 @@ function handleUpdateJob () {
         organization: $('input[name="organization"]').val(),
         location: $('input[name="location"]').val(),
         description: $('div[name="description"]').html(),
-        dateSort: Date.parse($('[name="pubDate"] input').val() + '  07:00:00 +0400')*-1,
-        pubDate: Date.parse($('[name="pubDate"] input').val() + '  07:00:00 +0400'),
-        expirationDate: ($('[name="expirationDate"] input').val()) ? Date.parse($('[name="expirationDate"] input').val() + '  20:00:00 +0400') : null,
+        dateSort: Date.parse($('input[name="pubDate"]').val() + '  07:00:00 +0400')*-1,
+        pubDate: Date.parse($('input[name="pubDate"]').val() + '  07:00:00 +0400'),
+        expirationDate: ($('input[name="expirationDate"]').val()) ? Date.parse($('input[name="expirationDate"]').val() + '  20:00:00 +0400') : null,
         source:$('input[name="source"]').val(),
     });
 }
@@ -341,7 +353,7 @@ function handleRemoveJob (){
         firebase.database().ref('jobs/'+jobId+'/filledDate').set(Date.now());
     }
 
-    $('#currentPosting').empty();
+    $('#currentPosting').removeClass('show').empty();
 }
 
 function handleEditToggle () {
