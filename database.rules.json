@@ -1,0 +1,18 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && (!data.exists() || data.child('uid').val() === auth.uid  || root.child('users/'+auth.uid+'/usertype').val()==='admin')",
+        "usertype": {".validate": "newData.val() === '' || root.child('users/'+auth.uid+'/usertype').val()==='admin'"}
+      }
+    },
+    "jobs": {
+      ".read": true,
+      "$jobid":{
+        ".write": "auth != null && (!data.exists() || data.child('uid').val() === auth.uid  || root.child('users/'+auth.uid+'/usertype').val()==='admin')",
+      	"status": {".validate": "newData.val() === 0 || root.child('users/'+auth.uid+'/usertype').val()==='admin'"}
+      }
+    }
+  }
+}
